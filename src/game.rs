@@ -1,6 +1,9 @@
+use serde_derive::{Deserialize, Serialize};
+
 use crate::objects::{Object, objects::Tile};
 use std::fmt::{self};
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
     map: Vec<Vec<Object>>,
 }

@@ -3,6 +3,9 @@ use std::{
     net::TcpStream,
 };
 
+use fssota::game::Game;
+use serde_json::from_slice;
+
 pub struct Client {
     stream: TcpStream,
 }
@@ -13,24 +16,40 @@ impl Client {
         Ok(Client { stream })
     }
 
-    pub fn read(&mut self) -> io::Result<String> {
-        let mut buffer = [0; 512];
-        let bytes_read = self.stream.read(&mut buffer)?;
-        let data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
-        Ok(data)
+    pub fn handle(&mut self) -> io::Result<()> {
+        Ok(())
     }
 
-    pub fn write(&mut self, data: &str) -> io::Result<()> {
-        self.stream.write_all(data.as_bytes())
+    fn read(&mut self) -> io::Result<Vec<u8>> {
+        // get the size of the buffer
+        let mut size = [0u8; 8];
+        self.stream.read_exact(&mut size)?;
+        let length = usize::from_be_bytes(size);
+
+        // receive the actual data
+        let mut buffer = vec![0; length];
+        self.stream.read(&mut buffer)?;
+        Ok(buffer)
+    }
+
+    fn write(&mut self, data: &str) -> io::Result<()> {
+        let bytes = data.as_bytes();
+        let length = bytes.len();
+        self.stream.write_all(&length.to_be_bytes())?;
+        self.stream.write_all(bytes)
     }
 }
 
 fn main() -> io::Result<()> {
     let mut c = Client::new("192.168.0.21:60000")?;
-    c.write("Hello world")?;
+
+    c.write("!SCREEN")?;
 
     let data = c.read()?;
-    println!("{}", data);
+    let game: Game = from_slice(&data)?;
+    println!("{}", game);
+
+    c.write("!DISCONNECT")?;
 
     Ok(())
 }

@@ -1,20 +1,21 @@
 use std::{
     io::{self, Read, Write},
-    net::{TcpListener, TcpStream},
+    net::{Shutdown, TcpListener, TcpStream},
 };
 
 use fssota::game::Game;
+use serde_json::to_vec;
 
 pub struct Server {
     address: String,
-    game: Game
+    game: Game,
 }
 
 impl Server {
     pub fn new(address: &str) -> Self {
         Server {
             address: address.to_string(),
-            game: Game::new()
+            game: Game::new(),
         }
     }
 
@@ -36,24 +37,44 @@ impl Server {
     }
 
     fn handle_client(&self, mut stream: TcpStream) -> io::Result<()> {
-        let data = self.read(&mut stream)?;
+        let mut request;
 
-        println!("{}", data);
+        loop {
+            request = self.read(&mut stream)?;
+            println!("{}", request);
 
-        self.write(&mut stream, "Hello client")?;
+            match request.as_str() {
+                "!DISCONNECT" => {
+                    stream.shutdown(Shutdown::Both)?;
+                    break;
+                }
+                "!SCREEN" => {
+                    let bytes = to_vec(&self.game)?;
+                    self.write(&mut stream, bytes)?;
+                }
+                _ => (),
+            }
+        }
 
         Ok(())
     }
 
-    fn write(&self, stream: &mut TcpStream, data: &str) -> io::Result<()> {
-        stream.write_all(data.as_bytes())
+    fn read(&self, stream: &mut TcpStream) -> io::Result<String> {
+        // get the size of the buffer
+        let mut size = [0u8; 8];
+        stream.read_exact(&mut size)?;
+        let length = usize::from_be_bytes(size);
+
+        // receive the actual data
+        let mut buffer = vec![0; length];
+        stream.read(&mut buffer)?;
+        Ok(String::from_utf8_lossy(&buffer).to_string())
     }
 
-    fn read(&self, stream: &mut TcpStream) -> io::Result<String> {
-        let mut buffer = [0; 512];
-        let bytes_read = stream.read(&mut buffer)?;
-        let data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
-        Ok(data)
+    fn write(&self, stream: &mut TcpStream, bytes: Vec<u8>) -> io::Result<()> {
+        let length = bytes.len();
+        stream.write_all(&length.to_be_bytes())?;
+        stream.write_all(&bytes)
     }
 }
 
