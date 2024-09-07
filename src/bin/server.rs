@@ -3,14 +3,18 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
+use fssota::game::Game;
+
 pub struct Server {
     address: String,
+    game: Game
 }
 
 impl Server {
     pub fn new(address: &str) -> Self {
         Server {
             address: address.to_string(),
+            game: Game::new()
         }
     }
 
