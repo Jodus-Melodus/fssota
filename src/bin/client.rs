@@ -1,8 +1,9 @@
 use std::{
     io::{self, Read, Write},
-    net::TcpStream,
+    net::{Shutdown, TcpStream},
 };
 
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use fssota::game::Game;
 use serde_json::from_slice;
 
@@ -17,6 +18,33 @@ impl Client {
     }
 
     pub fn handle(&mut self) -> io::Result<()> {
+        loop {
+            if event::poll(std::time::Duration::from_millis(500))? {
+                if let Event::Key(event) = event::read()? {
+                    if event.kind == KeyEventKind::Press {
+                        match event.code {
+                            KeyCode::Char(c) => match c {
+                                'w' => self.write("!MOVE")?,
+                                'a' => self.write("!MOVE")?,
+                                's' => self.write("!MOVE")?,
+                                'd' => self.write("!MOVE")?,
+                                _ => {}
+                            },
+                            KeyCode::Esc => {
+                                self.write("!DISCONNECT")?;
+                                self.stream.shutdown(Shutdown::Both)?;
+                                break;
+                            }
+                            _ => {}
+                        }
+                        self.write("!SCREEN")?;
+                        let bytes = self.read()?;
+                        let game: Game = from_slice(&bytes)?;
+                        println!("{}", game);
+                    }
+                }
+            }
+        }
         Ok(())
     }
 
@@ -42,14 +70,7 @@ impl Client {
 
 fn main() -> io::Result<()> {
     let mut c = Client::new("192.168.0.21:60000")?;
-
-    c.write("!SCREEN")?;
-
-    let data = c.read()?;
-    let game: Game = from_slice(&data)?;
-    println!("{}", game);
-
-    c.write("!DISCONNECT")?;
+    c.handle()?;
 
     Ok(())
 }

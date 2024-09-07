@@ -41,7 +41,7 @@ impl Server {
 
         loop {
             request = self.read(&mut stream)?;
-            println!("{}", request);
+            println!("Requested: {}", request);
 
             match request.as_str() {
                 "!DISCONNECT" => {
