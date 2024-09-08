@@ -1,8 +1,9 @@
-use colored::Colorize;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+use crate::utils::Color;
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Object {
     Tile(Tile),
     Tree(Tree),
@@ -19,7 +20,7 @@ impl fmt::Display for Object {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Tile {}
 
 impl Tile {
@@ -30,12 +31,13 @@ impl Tile {
 
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", ".")
+        write!(f, "  ")
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Tree {}
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Tree {
+}
 
 impl Tree {
     pub fn new() -> Self {
@@ -45,26 +47,27 @@ impl Tree {
 
 impl fmt::Display for Tree {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", "▲".green())
+        write!(f, "{} ", Color::green("▲"))
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Player {
     pub name: String,
     pub x: usize,
     pub y: usize,
-    symbol: char
+    symbol: char,
+    color: Color
 }
 
 impl Player {
     pub fn new(name: String, x: usize, y:usize, symbol: char) -> Self {
-        Player { name, x, y, symbol }
+        Player { name, x, y, symbol, color: Color::random(&symbol.to_string()) }
     }
 }
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", &self.symbol.to_string().magenta())
+        write!(f, "{} ", self.color)
     }
 }

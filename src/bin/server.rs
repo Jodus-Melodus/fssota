@@ -60,6 +60,8 @@ impl Server {
             match request.as_str() {
                 "!DISCONNECT" => {
                     println!("{} disconnected", name);
+                    let game = &mut server.lock().unwrap().game;
+                    game.kill_player(player);
                     stream.shutdown(Shutdown::Both)?;
                     break;
                 }

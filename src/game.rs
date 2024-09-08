@@ -6,8 +6,8 @@ use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
-const WIDTH: usize = 64;
-const HEIGHT: usize = 32;
+const WIDTH: usize = 30;
+const HEIGHT: usize = 20;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
@@ -38,6 +38,17 @@ impl Game {
 
         self.map[y][x] = Object::Player(player.clone());
         player
+    }
+
+    pub fn kill_player(&mut self, player: Player) {
+        for y in 0..WIDTH {
+            for x in 0..HEIGHT {
+                if self.map[y][x] == Object::Player(player.clone()) {
+                    self.map[y][x] = Object::Tile(Tile::new());
+                    return;
+                }
+            }
+        }
     }
 
     pub fn move_player(&mut self, player: &mut Player, direction: Direction) {
