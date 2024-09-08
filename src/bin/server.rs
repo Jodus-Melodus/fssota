@@ -40,14 +40,16 @@ impl Server {
     }
 
     fn handle_client(server: Arc<Mutex<Server>>, mut stream: TcpStream) -> io::Result<()> {
-        let mut request;
+        let name = Self::read(&mut stream)?;
+        println!("{} joined!", name);
 
+        let mut request;
         loop {
             request = Self::read(&mut stream)?;
-            println!("Requested: {}", request);
 
             match request.as_str() {
                 "!DISCONNECT" => {
+                    println!("{} disconnected", name);
                     stream.shutdown(Shutdown::Both)?;
                     break;
                 }
@@ -56,7 +58,7 @@ impl Server {
                     let bytes = to_vec(&game)?;
                     Self::write(&mut stream, bytes)?;
                 }
-                _ => (),
+                _ => println!("Requested: {}", request),
             }
         }
 

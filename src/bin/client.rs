@@ -1,10 +1,10 @@
 use std::{
     io::{self, Read, Write},
-    net::{Shutdown, TcpStream},
+    net::TcpStream,
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use fssota::game::Game;
+use fssota::{game::Game, utils::read_line};
 use serde_json::from_slice;
 
 pub struct Client {
@@ -18,6 +18,10 @@ impl Client {
     }
 
     pub fn handle(&mut self) -> io::Result<()> {
+
+        let name = read_line("Enter your name > ");
+        self.write(&name)?;
+
         loop {
             if event::poll(std::time::Duration::from_millis(500))? {
                 if let Event::Key(event) = event::read()? {
@@ -32,7 +36,6 @@ impl Client {
                             },
                             KeyCode::Esc => {
                                 self.write("!DISCONNECT")?;
-                                // self.stream.shutdown(Shutdown::Both)?;
                                 break;
                             }
                             _ => {}
