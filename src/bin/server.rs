@@ -5,7 +5,7 @@ use std::{
     thread,
 };
 
-use fssota::game::Game;
+use fssota::{game::Game, utils::Direction};
 use serde_json::to_vec;
 
 pub struct Server {
@@ -41,12 +41,12 @@ impl Server {
 
     fn handle_client(server: Arc<Mutex<Server>>, mut stream: TcpStream) -> io::Result<()> {
         let name = Self::read(&mut stream)?;
-        
-        println!("{} joined!", name);
-
         let symbol = Self::read(&mut stream)?.chars().next().unwrap();
+        
+        println!("{} joined as {}", name, symbol);
 
-        let player;
+
+        let mut player;
         {
             player = server.lock().unwrap().game.spawn_player(&name, symbol);
         }
@@ -65,6 +65,19 @@ impl Server {
                     let game = &server.lock().unwrap().game;
                     let bytes = to_vec(&game)?;
                     Self::write(&mut stream, bytes)?;
+                }
+                "!MOVE" => {
+                    let direction = Self::read(&mut stream)?;
+                    let direction = match direction.chars().next().unwrap() {
+                        'w' => Direction::N,
+                        'd' => Direction::E,
+                        's' => Direction::S,
+                        'a' => Direction::W,
+                        _ => panic!()
+                    };
+                    
+                    let game = &mut server.lock().unwrap().game;
+                    game.move_player(&mut player, direction);
                 }
                 _ => println!("Requested: {}", request),
             }

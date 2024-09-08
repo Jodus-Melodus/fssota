@@ -52,8 +52,8 @@ impl fmt::Display for Tree {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Player {
     name: String,
-    x: usize,
-    y: usize,
+    pub x: usize,
+    pub y: usize,
     symbol: char
 }
 

@@ -31,10 +31,22 @@ impl Client {
                     if event.kind == KeyEventKind::Press {
                         match event.code {
                             KeyCode::Char(c) => match c {
-                                'w' => self.write("!MOVE")?,
-                                'a' => self.write("!MOVE")?,
-                                's' => self.write("!MOVE")?,
-                                'd' => self.write("!MOVE")?,
+                                'w' => {
+                                    self.write("!MOVE")?;
+                                    self.write("w")?;
+                                },
+                                'a' => {
+                                    self.write("!MOVE")?;
+                                    self.write("a")?;
+                                },
+                                's' => {
+                                    self.write("!MOVE")?;
+                                    self.write("s")?;
+                                },
+                                'd' => {
+                                    self.write("!MOVE")?;
+                                    self.write("d")?;
+                                },
                                 _ => {}
                             },
                             KeyCode::Esc => {
