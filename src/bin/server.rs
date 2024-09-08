@@ -1,6 +1,8 @@
 use std::{
     io::{self, Read, Write},
     net::{Shutdown, TcpListener, TcpStream},
+    sync::{Arc, Mutex},
+    thread,
 };
 
 use fssota::game::Game;
@@ -19,15 +21,16 @@ impl Server {
         }
     }
 
-    pub fn start(&self) -> io::Result<()> {
-        let listener = TcpListener::bind(&self.address)?;
+    pub fn start(server: Arc<Mutex<Self>>) -> io::Result<()> {
+        let listener = TcpListener::bind(&server.lock().unwrap().address)?;
 
-        println!("Server is listening on {}", self.address);
+        println!("Server is listening on {}", server.lock().unwrap().address);
 
         for stream in listener.incoming() {
+            let server = Arc::clone(&server);
             match stream {
                 Ok(s) => {
-                    self.handle_client(s)?;
+                    thread::spawn(move || Self::handle_client(server, s));
                 }
                 Err(e) => eprintln!("Failed to connect: {}", e),
             }
@@ -36,11 +39,11 @@ impl Server {
         Ok(())
     }
 
-    fn handle_client(&self, mut stream: TcpStream) -> io::Result<()> {
+    fn handle_client(server: Arc<Mutex<Server>>, mut stream: TcpStream) -> io::Result<()> {
         let mut request;
 
         loop {
-            request = self.read(&mut stream)?;
+            request = Self::read(&mut stream)?;
             println!("Requested: {}", request);
 
             match request.as_str() {
@@ -49,8 +52,9 @@ impl Server {
                     break;
                 }
                 "!SCREEN" => {
-                    let bytes = to_vec(&self.game)?;
-                    self.write(&mut stream, bytes)?;
+                    let game = &server.lock().unwrap().game;
+                    let bytes = to_vec(&game)?;
+                    Self::write(&mut stream, bytes)?;
                 }
                 _ => (),
             }
@@ -59,19 +63,17 @@ impl Server {
         Ok(())
     }
 
-    fn read(&self, stream: &mut TcpStream) -> io::Result<String> {
-        // get the size of the buffer
+    fn read(stream: &mut TcpStream) -> io::Result<String> {
         let mut size = [0u8; 8];
         stream.read_exact(&mut size)?;
         let length = usize::from_be_bytes(size);
 
-        // receive the actual data
         let mut buffer = vec![0; length];
-        stream.read(&mut buffer)?;
+        stream.read_exact(&mut buffer)?;
         Ok(String::from_utf8_lossy(&buffer).to_string())
     }
 
-    fn write(&self, stream: &mut TcpStream, bytes: Vec<u8>) -> io::Result<()> {
+    fn write(stream: &mut TcpStream, bytes: Vec<u8>) -> io::Result<()> {
         let length = bytes.len();
         stream.write_all(&length.to_be_bytes())?;
         stream.write_all(&bytes)
@@ -79,8 +81,8 @@ impl Server {
 }
 
 fn main() -> io::Result<()> {
-    let s = Server::new("192.168.0.21:60000");
-    s.start()?;
+    let server = Arc::new(Mutex::new(Server::new("192.168.0.21:60000")));
+    Server::start(server)?;
 
     Ok(())
 }

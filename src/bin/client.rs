@@ -32,7 +32,7 @@ impl Client {
                             },
                             KeyCode::Esc => {
                                 self.write("!DISCONNECT")?;
-                                self.stream.shutdown(Shutdown::Both)?;
+                                // self.stream.shutdown(Shutdown::Both)?;
                                 break;
                             }
                             _ => {}
