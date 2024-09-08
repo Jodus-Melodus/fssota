@@ -22,6 +22,9 @@ impl Client {
         let name = read_line("Enter your name > ");
         self.write(&name)?;
 
+        let symbol = read_line("Enter your symbol > ");
+        self.write(&symbol)?;
+
         loop {
             if event::poll(std::time::Duration::from_millis(500))? {
                 if let Event::Key(event) = event::read()? {

@@ -1,42 +1,70 @@
-use objects::Tile;
+use colored::Colorize;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Object {
     Tile(Tile),
+    Tree(Tree),
+    Player(Player)
 }
 
 impl fmt::Display for Object {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Tile(t) => write!(f, "{}", t),
+            Self::Tree(t) => write!(f, "{}", t),
+            Self::Player(p) => write!(f, "{}", p),
         }
     }
 }
 
-pub mod objects {
-    use std::fmt;
-    use serde_derive::{Deserialize, Serialize};
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Tile {}
 
-    #[derive(Debug, Serialize, Deserialize)]
-    pub struct Tile {}
-
-    impl Tile {
-        pub fn new() -> Self {
-            Tile {}
-        }
+impl Tile {
+    pub fn new() -> Self {
+        Tile {}
     }
+}
 
-    impl fmt::Display for Tile {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{} ", ".")
-        }
+impl fmt::Display for Tile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", ".")
     }
+}
 
-    impl Clone for Tile {
-        fn clone(&self) -> Self {
-            Tile {}
-        }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Tree {}
+
+impl Tree {
+    pub fn new() -> Self {
+        Tree {}
+    }
+}
+
+impl fmt::Display for Tree {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", "▲".green())
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Player {
+    name: String,
+    x: usize,
+    y: usize,
+    symbol: char
+}
+
+impl Player {
+    pub fn new(name: String, x: usize, y:usize, symbol: char) -> Self {
+        Player { name, x, y, symbol }
+    }
+}
+
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", &self.symbol.to_string().magenta())
     }
 }

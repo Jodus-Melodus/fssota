@@ -41,7 +41,15 @@ impl Server {
 
     fn handle_client(server: Arc<Mutex<Server>>, mut stream: TcpStream) -> io::Result<()> {
         let name = Self::read(&mut stream)?;
+        
         println!("{} joined!", name);
+
+        let symbol = Self::read(&mut stream)?.chars().next().unwrap();
+
+        let player;
+        {
+            player = server.lock().unwrap().game.spawn_player(&name, symbol);
+        }
 
         let mut request;
         loop {

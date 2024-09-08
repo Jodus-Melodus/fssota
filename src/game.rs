@@ -1,7 +1,7 @@
+use crate::objects::{Object, Player, Tile, Tree};
+use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
-
-use crate::objects::{Object, objects::Tile};
-use std::fmt::{self};
+use std::fmt;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
@@ -10,9 +10,28 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        Game {
-            map: vec![vec![Object::Tile(Tile::new()); 64]; 64],
+        let mut map = vec![vec![Object::Tile(Tile::new()); 64]; 64];
+        let mut rng = rand::thread_rng();
+
+        for y in 0..64 {
+            for x in 0..64 {
+                if rng.gen::<f32>() > 0.9 {
+                    map[y][x] = Object::Tree(Tree::new())
+                }
+            }
         }
+
+        Game { map }
+    }
+
+    pub fn spawn_player(&mut self, name: &str, symbol: char) -> Player {
+        let mut rng = rand::thread_rng();
+        let x = rng.gen_range(0..64);
+        let y = rng.gen_range(0..64);
+        let player = Player::new(name.to_string(), x, y, symbol);
+        
+        self.map[y][x] = Object::Player(player.clone());
+        player
     }
 }
 
