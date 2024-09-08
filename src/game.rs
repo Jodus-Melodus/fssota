@@ -41,8 +41,8 @@ impl Game {
     }
 
     pub fn kill_player(&mut self, player: Player) {
-        for y in 0..WIDTH {
-            for x in 0..HEIGHT {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
                 if self.map[y][x] == Object::Player(player.clone()) {
                     self.map[y][x] = Object::Tile(Tile::new());
                     return;
