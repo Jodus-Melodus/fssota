@@ -5,12 +5,13 @@ use std::{
     thread,
 };
 
-use fssota::{game::Game, utils::Direction};
+use fssota::{chat::Chat, game::Game, utils::Direction};
 use serde_json::to_vec;
 
 pub struct Server {
     address: String,
     game: Game,
+    _chat: Chat
 }
 
 impl Server {
@@ -18,6 +19,7 @@ impl Server {
         Server {
             address: address.to_string(),
             game: Game::new(),
+            _chat: Chat::new()
         }
     }
 
