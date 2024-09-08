@@ -6,6 +6,9 @@ use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
+const WIDTH: usize = 64;
+const HEIGHT: usize = 32;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
     map: Vec<Vec<Object>>,
@@ -13,11 +16,11 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
-        let mut map = vec![vec![Object::Tile(Tile::new()); 64]; 64];
+        let mut map = vec![vec![Object::Tile(Tile::new()); WIDTH]; HEIGHT];
         let mut rng = rand::thread_rng();
 
-        for y in 0..64 {
-            for x in 0..64 {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
                 if rng.gen::<f32>() > 0.9 {
                     map[y][x] = Object::Tree(Tree::new())
                 }
@@ -29,8 +32,8 @@ impl Game {
 
     pub fn spawn_player(&mut self, name: &str, symbol: char) -> Player {
         let mut rng = rand::thread_rng();
-        let x = rng.gen_range(0..64);
-        let y = rng.gen_range(0..64);
+        let x = rng.gen_range(0..WIDTH);
+        let y = rng.gen_range(0..HEIGHT);
         let player = Player::new(name.to_string(), x, y, symbol);
 
         self.map[y][x] = Object::Player(player.clone());
@@ -55,7 +58,7 @@ impl Game {
             }
         }
 
-        if (new_x < 64) && (new_y < 64) && (new_x >= 0) && (new_y >= 0) {
+        if (new_x < WIDTH as isize) && (new_y < HEIGHT as isize) && (new_x >= 0) && (new_y >= 0) {
             let x = new_x as usize;
             let y = new_y as usize;
 
@@ -76,8 +79,8 @@ impl Game {
 
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for y in 0..64 {
-            for x in 0..64 {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
                 write!(f, "{}", self.map[y][x])?;
             }
             writeln!(f, "")?;
