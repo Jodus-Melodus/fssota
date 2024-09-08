@@ -5,13 +5,13 @@ use std::{
     thread,
 };
 
-use fssota::{chat::Chat, game::Game, utils::Direction};
+use fssota::{chat::{Chat, Message}, game::Game, utils::Direction};
 use serde_json::to_vec;
 
 pub struct Server {
     address: String,
     game: Game,
-    _chat: Chat
+    chat: Chat
 }
 
 impl Server {
@@ -19,7 +19,7 @@ impl Server {
         Server {
             address: address.to_string(),
             game: Game::new(),
-            _chat: Chat::new()
+            chat: Chat::new()
         }
     }
 
@@ -80,6 +80,19 @@ impl Server {
                     
                     let game = &mut server.lock().unwrap().game;
                     game.move_player(&mut player, direction);
+                }
+                "!CHAT" => {
+                    let chat = &server.lock().unwrap().chat;
+                    let bytes = to_vec(&chat)?;
+                    Self::write(&mut stream, bytes)?;
+                }
+                "!NEWMESSAGE" => {
+                    let msg = Self::read(&mut stream)?;
+                    let message = Message::new(player.clone(), &msg);
+                    let chat = &mut server.lock().unwrap().chat;
+                    chat.add_new_message(message);
+
+                    println!("{} sent: {}", player.name, msg);
                 }
                 _ => println!("Requested: {}", request),
             }

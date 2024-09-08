@@ -4,7 +4,7 @@ use std::{
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use fssota::{game::Game, utils::read_line};
+use fssota::{chat::Chat, game::Game, utils::read_line};
 use serde_json::from_slice;
 
 pub struct Client {
@@ -47,6 +47,19 @@ impl Client {
                                     self.write("!MOVE")?;
                                     self.write("d")?;
                                 },
+                                '/' => {
+                                    self.write("!CHAT")?;
+                                    let bytes = self.read()?;
+                                    let chat: Chat = from_slice(&bytes)?;
+                                    println!("{}", chat);
+                                    let message = read_line("> ");
+
+                                    if message.len() > 0 {
+                                        self.write("!NEWMESSAGE")?;
+                                        self.write(&message)?;
+                                    }
+
+                                }
                                 _ => {}
                             },
                             KeyCode::Esc => {
@@ -87,7 +100,10 @@ impl Client {
 }
 
 fn main() -> io::Result<()> {
-    let mut c = Client::new("192.168.0.21:60000")?;
+    let address = "192.168.0.21:60000";
+    println!("Connecting to {}", address);
+    let mut c = Client::new(&address).unwrap();
+    println!("Starting game loop");
     c.handle()?;
 
     Ok(())
