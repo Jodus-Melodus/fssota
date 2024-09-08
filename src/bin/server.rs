@@ -18,7 +18,7 @@ impl Server {
     pub fn new(address: &str) -> Self {
         Server {
             address: address.to_string(),
-            game: Game::new(),
+            game: Game::new(30, 20),
             chat: Chat::new()
         }
     }

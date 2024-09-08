@@ -6,34 +6,33 @@ use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 
-const WIDTH: usize = 30;
-const HEIGHT: usize = 20;
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
+    width: usize,
+    height: usize,
     map: Vec<Vec<Object>>,
 }
 
 impl Game {
-    pub fn new() -> Self {
-        let mut map = vec![vec![Object::Tile(Tile::new()); WIDTH]; HEIGHT];
+    pub fn new(width: usize, height: usize) -> Self {
+        let mut map = vec![vec![Object::Tile(Tile::new()); width]; height];
         let mut rng = rand::thread_rng();
 
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
+        for y in 0..height {
+            for x in 0..width {
                 if rng.gen::<f32>() > 0.9 {
                     map[y][x] = Object::Tree(Tree::new())
                 }
             }
         }
 
-        Game { map }
+        Game { width, height, map }
     }
 
     pub fn spawn_player(&mut self, name: &str, symbol: char) -> Player {
         let mut rng = rand::thread_rng();
-        let x = rng.gen_range(0..WIDTH);
-        let y = rng.gen_range(0..HEIGHT);
+        let x = rng.gen_range(0..self.width);
+        let y = rng.gen_range(0..self.height);
         let player = Player::new(name.to_string(), x, y, symbol);
 
         self.map[y][x] = Object::Player(player.clone());
@@ -41,8 +40,8 @@ impl Game {
     }
 
     pub fn kill_player(&mut self, player: Player) {
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if self.map[y][x] == Object::Player(player.clone()) {
                     self.map[y][x] = Object::Tile(Tile::new());
                     return;
@@ -69,7 +68,7 @@ impl Game {
             }
         }
 
-        if (new_x < WIDTH as isize) && (new_y < HEIGHT as isize) && (new_x >= 0) && (new_y >= 0) {
+        if (new_x < self.width as isize) && (new_y < self.height as isize) && (new_x >= 0) && (new_y >= 0) {
             let x = new_x as usize;
             let y = new_y as usize;
 
@@ -90,8 +89,8 @@ impl Game {
 
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 write!(f, "{}", self.map[y][x])?;
             }
             writeln!(f, "")?;
