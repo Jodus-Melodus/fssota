@@ -22,10 +22,16 @@ impl Client {
     }
 
     pub fn handle(&mut self) -> io::Result<()> {
-        let name = read_line("Enter your name > ");
+        let mut name = read_line("Enter your name (leave blank to use username) > ");
+        if name.is_empty() {
+            name = whoami::username();
+        }
         self.write(&name)?;
 
-        let symbol = read_line("Enter your symbol > ");
+        let mut symbol = read_line("Enter your symbol (leave blank for default) > ");
+        if symbol.is_empty() {
+            symbol = "@".to_string();
+        }
         self.write(&symbol)?;
 
         loop {

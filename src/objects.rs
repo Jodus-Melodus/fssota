@@ -1,7 +1,6 @@
+use colored::Colorize;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
-
-use crate::utils::Color;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Object {
@@ -46,7 +45,7 @@ impl Tree {
 
 impl fmt::Display for Tree {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", Color::green("▲"))
+        write!(f, "{} ", "▲".green())
     }
 }
 
@@ -56,23 +55,16 @@ pub struct Player {
     pub x: usize,
     pub y: usize,
     symbol: char,
-    color: Color,
 }
 
 impl Player {
     pub fn new(name: String, x: usize, y: usize, symbol: char) -> Self {
-        Player {
-            name,
-            x,
-            y,
-            symbol,
-            color: Color::random(&symbol.to_string()),
-        }
+        Player { name, x, y, symbol }
     }
 }
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", self.color)
+        write!(f, "{} ", self.symbol.to_string().red())
     }
 }
