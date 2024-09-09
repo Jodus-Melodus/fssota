@@ -89,6 +89,33 @@ impl Game {
             }
         }
     }
+
+    pub fn game_from_player_view(&self, player: Player) -> Game {
+        let x_view_range = (player.x.saturating_sub(20))..(player.x + 20);
+        let y_view_range = (player.y.saturating_sub(10))..(player.y + 10);
+
+        let mut view_map =
+            vec![
+                vec![Object::Tile(Tile::new()); (x_view_range.end - x_view_range.start) as usize];
+                (y_view_range.end - y_view_range.start) as usize
+            ];
+
+        for (y, row) in y_view_range.enumerate() {
+            for (x, col) in x_view_range.clone().enumerate() {
+                if let Some(ref game_row) = self.map.get(row) {
+                    if let Some(&ref object) = game_row.get(col) {
+                        view_map[y][x] = object.clone();
+                    }
+                }
+            }
+        }
+
+        Game {
+            map: view_map.clone(),
+            width: view_map[0].len(),
+            height: view_map.len(),
+        }
+    }
 }
 
 impl fmt::Display for Game {

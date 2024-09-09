@@ -22,7 +22,7 @@ impl Server {
     pub fn new(address: &str) -> Self {
         Server {
             address: address.to_string(),
-            game: Game::new(30, 20),
+            game: Game::new(100, 100),
             chat: Chat::new(),
         }
     }
@@ -69,7 +69,7 @@ impl Server {
                     break;
                 }
                 "!SCREEN" => {
-                    let game = &server.lock().unwrap().game;
+                    let game = &server.lock().unwrap().game.game_from_player_view(player.clone());
                     let bytes = to_vec(&game)?;
                     Self::write(&mut stream, bytes)?;
                 }
