@@ -8,7 +8,17 @@ use std::io::{stdin, stdout, Write};
 pub fn get_local_ip() -> Option<String> {
     match local_ip() {
         Ok(ip) => Some(ip.to_string()),
-        Err(_) => None
+        Err(_) => None,
+    }
+}
+
+use std::process::Command;
+
+pub fn clear_terminal() {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd").args(&["/C", "cls"]).status().unwrap();
+    } else {
+        Command::new("clear").status().unwrap();
     }
 }
 
@@ -62,7 +72,6 @@ impl fmt::Display for Color {
         }
     }
 }
-
 
 pub fn read_line(prompt: &str) -> String {
     print!("{}", prompt);

@@ -1,5 +1,5 @@
-use std::fmt;
 use serde_derive::{Deserialize, Serialize};
+use std::fmt;
 
 use crate::objects::Player;
 
@@ -22,7 +22,14 @@ impl Chat {
 
 impl fmt::Display for Chat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for message in &self.messages {
+        let mut messages = self.messages.clone();
+        messages.reverse();
+
+        let n = *vec![messages.len(), 5].iter().min().unwrap();
+        let mut n_most_recent_messages = messages[..n].to_vec();
+        n_most_recent_messages.reverse();
+
+        for message in n_most_recent_messages {
             writeln!(f, "{}", message)?;
         }
         write!(f, "")
@@ -37,7 +44,10 @@ pub struct Message {
 
 impl Message {
     pub fn new(sender: Player, message: &str) -> Self {
-        Message { sender, message: message.to_string() }
+        Message {
+            sender,
+            message: message.to_string(),
+        }
     }
 }
 

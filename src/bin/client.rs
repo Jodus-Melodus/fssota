@@ -4,7 +4,11 @@ use std::{
 };
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use fssota::{chat::Chat, game::Game, utils::read_line};
+use fssota::{
+    chat::Chat,
+    game::Game,
+    utils::{clear_terminal, read_line},
+};
 use serde_json::from_slice;
 
 pub struct Client {
@@ -18,15 +22,6 @@ impl Client {
     }
 
     pub fn handle(&mut self) -> io::Result<()> {
-        println!(
-            r"
-   ____     ____           ______    _         _   ____              _                          ___  __  __         ___                      __                 
-  / __/__ _/ / /__ ___    / __/ /__ (_)__ ___ (_) / __/_ _______  __(_)  _____  _______   ___  / _/ / /_/ /  ___   / _ | ___  ___  _______ _/ /_ _____  ___ ___ 
- / _// _ `/ / / -_) _ \  _\ \/  '_// / -_|_-<_   _\ \/ // / __/ |/ / / |/ / _ \/ __(_-<  / _ \/ _/ / __/ _ \/ -_) / __ |/ _ \/ _ \/ __/ _ `/ / // / _ \(_-</ -_)
-/_/  \_,_/_/_/\__/_//_/ /___/_/\_\/_/\__/___(_) /___/\_,_/_/  |___/_/|___/\___/_/ /___/  \___/_/   \__/_//_/\__/ /_/ |_/ .__/\___/\__/\_,_/_/\_, / .__/___/\__/ 
-                                                                                                                      /_/                   /___/_/             "
-        );
-
         let name = read_line("Enter your name > ");
         self.write(&name)?;
 
@@ -78,6 +73,7 @@ impl Client {
                         self.write("!SCREEN")?;
                         let bytes = self.read()?;
                         let game: Game = from_slice(&bytes)?;
+                        clear_terminal();
                         println!("{}", game);
                     }
                 }
@@ -107,6 +103,15 @@ impl Client {
 }
 
 fn main() -> io::Result<()> {
+    println!(
+        r"
+   ____     ____           ______    _         _   ____              _                          ___  __  __         ___                      __                 
+  / __/__ _/ / /__ ___    / __/ /__ (_)__ ___ (_) / __/_ _______  __(_)  _____  _______   ___  / _/ / /_/ /  ___   / _ | ___  ___  _______ _/ /_ _____  ___ ___ 
+ / _// _ `/ / / -_) _ \  _\ \/  '_// / -_|_-<_   _\ \/ // / __/ |/ / / |/ / _ \/ __(_-<  / _ \/ _/ / __/ _ \/ -_) / __ |/ _ \/ _ \/ __/ _ `/ / // / _ \(_-</ -_)
+/_/  \_,_/_/_/\__/_//_/ /___/_/\_\/_/\__/___(_) /___/\_,_/_/  |___/_/|___/\___/_/ /___/  \___/_/   \__/_//_/\__/ /_/ |_/ .__/\___/\__/\_,_/_/\_, / .__/___/\__/ 
+                                                                                                                      /_/                   /___/_/             "
+    );
+
     let server_ip_address = read_line("Enter server IP address > ");
     let port_number = "60000";
     let address = format!("{}:{}", server_ip_address, port_number);

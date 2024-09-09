@@ -7,7 +7,7 @@ use crate::utils::Color;
 pub enum Object {
     Tile(Tile),
     Tree(Tree),
-    Player(Player)
+    Player(Player),
 }
 
 impl fmt::Display for Object {
@@ -36,8 +36,7 @@ impl fmt::Display for Tile {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Tree {
-}
+pub struct Tree {}
 
 impl Tree {
     pub fn new() -> Self {
@@ -57,12 +56,18 @@ pub struct Player {
     pub x: usize,
     pub y: usize,
     symbol: char,
-    color: Color
+    color: Color,
 }
 
 impl Player {
-    pub fn new(name: String, x: usize, y:usize, symbol: char) -> Self {
-        Player { name, x, y, symbol, color: Color::random(&symbol.to_string()) }
+    pub fn new(name: String, x: usize, y: usize, symbol: char) -> Self {
+        Player {
+            name,
+            x,
+            y,
+            symbol,
+            color: Color::random(&symbol.to_string()),
+        }
     }
 }
 

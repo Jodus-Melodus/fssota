@@ -68,7 +68,11 @@ impl Game {
             }
         }
 
-        if (new_x < self.width as isize) && (new_y < self.height as isize) && (new_x >= 0) && (new_y >= 0) {
+        if (new_x < self.width as isize)
+            && (new_y < self.height as isize)
+            && (new_x >= 0)
+            && (new_y >= 0)
+        {
             let x = new_x as usize;
             let y = new_y as usize;
 

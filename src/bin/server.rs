@@ -97,7 +97,7 @@ impl Server {
                     let chat = &mut server.lock().unwrap().chat;
                     chat.add_new_message(message);
 
-                    println!("{} sent: {}", player.name, msg);
+                    println!("{} said: {}", player.name, msg);
                 }
                 _ => println!("Requested: {}", request),
             }
