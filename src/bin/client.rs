@@ -18,12 +18,14 @@ impl Client {
     }
 
     pub fn handle(&mut self) -> io::Result<()> {
-
-        println!(r"   ____     ____           ______    _         _   ____              _                          ___  __  __         ___                      __                 
+        println!(
+            r"
+   ____     ____           ______    _         _   ____              _                          ___  __  __         ___                      __                 
   / __/__ _/ / /__ ___    / __/ /__ (_)__ ___ (_) / __/_ _______  __(_)  _____  _______   ___  / _/ / /_/ /  ___   / _ | ___  ___  _______ _/ /_ _____  ___ ___ 
  / _// _ `/ / / -_) _ \  _\ \/  '_// / -_|_-<_   _\ \/ // / __/ |/ / / |/ / _ \/ __(_-<  / _ \/ _/ / __/ _ \/ -_) / __ |/ _ \/ _ \/ __/ _ `/ / // / _ \(_-</ -_)
 /_/  \_,_/_/_/\__/_//_/ /___/_/\_\/_/\__/___(_) /___/\_,_/_/  |___/_/|___/\___/_/ /___/  \___/_/   \__/_//_/\__/ /_/ |_/ .__/\___/\__/\_,_/_/\_, / .__/___/\__/ 
-                                                                                                                      /_/                   /___/_/             ");
+                                                                                                                      /_/                   /___/_/             "
+        );
 
         let name = read_line("Enter your name > ");
         self.write(&name)?;
@@ -40,19 +42,19 @@ impl Client {
                                 'w' => {
                                     self.write("!MOVE")?;
                                     self.write("w")?;
-                                },
+                                }
                                 'a' => {
                                     self.write("!MOVE")?;
                                     self.write("a")?;
-                                },
+                                }
                                 's' => {
                                     self.write("!MOVE")?;
                                     self.write("s")?;
-                                },
+                                }
                                 'd' => {
                                     self.write("!MOVE")?;
                                     self.write("d")?;
-                                },
+                                }
                                 '/' => {
                                     self.write("!CHAT")?;
                                     let bytes = self.read()?;
@@ -64,7 +66,6 @@ impl Client {
                                         self.write("!NEWMESSAGE")?;
                                         self.write(&message)?;
                                     }
-
                                 }
                                 _ => {}
                             },
@@ -106,9 +107,34 @@ impl Client {
 }
 
 fn main() -> io::Result<()> {
-    let address = "192.168.0.21:60000";
-    let mut c = Client::new(&address).unwrap();
-    c.handle()?;
+    let server_ip_address = read_line("Enter server IP address > ");
+    let port_number = "60000";
+    let address = format!("{}:{}", server_ip_address, port_number);
+    let mut connect_attempts = 5;
+
+    let mut client: Result<Client, _> = Err("Failed to connect");
+
+    while connect_attempts > 0 {
+        match Client::new(&address) {
+            Ok(c) => {
+                client = Ok(c);
+                println!("Successfully connected to {}", address);
+                break;
+            }
+            Err(e) => {
+                connect_attempts -= 1;
+                eprintln!(
+                    "Failed to connect. {} attemps left. Error: {}",
+                    connect_attempts, e
+                );
+            }
+        }
+    }
+
+    match client {
+        Ok(mut c) => c.handle()?,
+        Err(_) => eprintln!("Could not connect to the server after multiple attemps"),
+    }
 
     Ok(())
 }

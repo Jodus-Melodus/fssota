@@ -5,13 +5,17 @@ use std::{
     thread,
 };
 
-use fssota::{chat::{Chat, Message}, game::Game, utils::Direction};
+use fssota::{
+    chat::{Chat, Message},
+    game::Game,
+    utils::{get_local_ip, Direction},
+};
 use serde_json::to_vec;
 
 pub struct Server {
     address: String,
     game: Game,
-    chat: Chat
+    chat: Chat,
 }
 
 impl Server {
@@ -19,7 +23,7 @@ impl Server {
         Server {
             address: address.to_string(),
             game: Game::new(30, 20),
-            chat: Chat::new()
+            chat: Chat::new(),
         }
     }
 
@@ -44,9 +48,8 @@ impl Server {
     fn handle_client(server: Arc<Mutex<Server>>, mut stream: TcpStream) -> io::Result<()> {
         let name = Self::read(&mut stream)?;
         let symbol = Self::read(&mut stream)?.chars().next().unwrap();
-        
-        println!("{} joined as {}", name, symbol);
 
+        println!("{} joined as {}", name, symbol);
 
         let mut player;
         {
@@ -77,9 +80,9 @@ impl Server {
                         'd' => Direction::E,
                         's' => Direction::S,
                         'a' => Direction::W,
-                        _ => panic!()
+                        _ => panic!(),
                     };
-                    
+
                     let game = &mut server.lock().unwrap().game;
                     game.move_player(&mut player, direction);
                 }
@@ -121,8 +124,11 @@ impl Server {
 }
 
 fn main() -> io::Result<()> {
-    let server = Arc::new(Mutex::new(Server::new("192.168.0.21:60000")));
-    Server::start(server)?;
-
+    if let Some(ip) = get_local_ip() {
+        let port = "60000";
+        let address = format!("{}:{}", ip, port);
+        let server = Arc::new(Mutex::new(Server::new(&address)));
+        Server::start(server)?;
+    }
     Ok(())
 }

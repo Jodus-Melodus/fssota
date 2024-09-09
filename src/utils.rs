@@ -1,8 +1,16 @@
 use colored::*;
+use local_ip_address::local_ip;
 use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 use std::io::{stdin, stdout, Write};
+
+pub fn get_local_ip() -> Option<String> {
+    match local_ip() {
+        Ok(ip) => Some(ip.to_string()),
+        Err(_) => None
+    }
+}
 
 pub enum Direction {
     N,
