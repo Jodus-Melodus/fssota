@@ -7,6 +7,7 @@ pub enum Object {
     Tile(Tile),
     Tree(Tree),
     Player(Player),
+    Water(Water)
 }
 
 impl fmt::Display for Object {
@@ -15,7 +16,23 @@ impl fmt::Display for Object {
             Self::Tile(t) => write!(f, "{}", t),
             Self::Tree(t) => write!(f, "{}", t),
             Self::Player(p) => write!(f, "{}", p),
+            Self::Water(w) => write!(f, "{}", w), 
         }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Water {}
+
+impl Water {
+    pub fn new() -> Self {
+        Water {}
+    }
+}
+
+impl fmt::Display for Water {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", "~".blue())
     }
 }
 

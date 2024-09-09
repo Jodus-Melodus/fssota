@@ -1,5 +1,5 @@
 use crate::{
-    objects::{Object, Player, Tile, Tree},
+    objects::{Object, Player, Tile, Tree, Water},
     utils::Direction,
 };
 use rand::Rng;
@@ -16,15 +16,8 @@ pub struct Game {
 impl Game {
     pub fn new(width: usize, height: usize) -> Self {
         let mut map = vec![vec![Object::Tile(Tile::new()); width]; height];
-        let mut rng = rand::thread_rng();
-
-        for y in 0..height {
-            for x in 0..width {
-                if rng.gen::<f32>() > 0.9 {
-                    map[y][x] = Object::Tree(Tree::new())
-                }
-            }
-        }
+        Self::populate_trees(width, height, &mut map);
+        Self::populate_water(width, height, &mut map);
 
         Game { width, height, map }
     }
@@ -80,6 +73,7 @@ impl Game {
                 Object::Tile(_) => true,
                 Object::Tree(_) => false,
                 Object::Player(_) => false,
+                Object::Water(_) => false,
             };
 
             if valid {
@@ -114,6 +108,80 @@ impl Game {
             map: view_map.clone(),
             width: view_map[0].len(),
             height: view_map.len(),
+        }
+    }
+
+    fn populate_water(width: usize, height: usize, map: &mut Vec<Vec<Object>>) {
+        let mut rng = rand::thread_rng();
+        let adjacent_coordinates =
+            [(1, 1), (1, -1), (-1, -1), (-1, 1), (0, 1), (0, -1), (1, 0), (-1, 0)];
+
+        let water_density = ((width * height) as f32 * 0.0005) as usize;
+
+        for _ in 0..water_density {
+            let (x, y) = (rng.gen_range(2..width - 2), rng.gen_range(2..height - 2));
+            map[y][x] = Object::Water(Water::new());
+            Self::populate_adjacent_water(x, y, &adjacent_coordinates, map, &mut rng, 0.7, 5);
+        }
+    }
+
+    fn populate_adjacent_water(
+        x: usize,
+        y: usize,
+        adjacent_coordinates: &[(i8, i8)],
+        map: &mut Vec<Vec<Object>>,
+        rng: &mut rand::rngs::ThreadRng,
+        probability: f64,
+        depth: u8,
+    ) {
+        if depth > 0 {
+            for &(dx, dy) in adjacent_coordinates {
+                let (new_x, new_y) = (x as i8 + dx, y as i8 + dy);
+                if new_x >= 0 && new_y >= 0 && new_y < map.len() as i8 && new_x < map[0].len() as i8
+                {
+                    let (new_x, new_y) = (new_x as usize, new_y as usize);
+                    if rng.gen_bool(probability) {
+                        map[new_y][new_x] = Object::Water(Water::new());
+                        Self::populate_adjacent_water(
+                            new_x,
+                            new_y,
+                            adjacent_coordinates,
+                            map,
+                            rng,
+                            probability - 0.05,
+                            depth - 1,
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    fn populate_trees(width: usize, height: usize, map: &mut Vec<Vec<Object>>) {
+        let mut rng = rand::thread_rng();
+        let adjacent_coordinates: [(i8, i8); 8] = [
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (1, -1),
+            (-1, -1),
+            (-1, 0),
+            (0, 1),
+            (1, 0),
+        ];
+
+        let tree_density = ((width * height) as f32 * 0.03) as usize;
+
+        for _ in 0..tree_density {
+            let (x, y) = (rng.gen_range(1..width - 1), rng.gen_range(1..height - 1));
+            map[y][x] = Object::Tree(Tree::new());
+
+            for adjacent_coordinate in adjacent_coordinates {
+                if rng.gen_bool(0.5) {
+                    map[(y as i8 + adjacent_coordinate.1) as usize]
+                        [(x as i8 + adjacent_coordinate.0) as usize] = Object::Tree(Tree::new());
+                }
+            }
         }
     }
 }
