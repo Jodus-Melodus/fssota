@@ -91,8 +91,8 @@ impl Game {
     }
 
     pub fn game_from_player_view(&self, player: Player) -> Game {
-        let x_view_range = (player.x.saturating_sub(20))..(player.x + 20);
-        let y_view_range = (player.y.saturating_sub(10))..(player.y + 10);
+        let x_view_range = (player.x.saturating_sub(40))..(player.x + 40);
+        let y_view_range = (player.y.saturating_sub(20))..(player.y + 20);
 
         let mut view_map =
             vec![

@@ -72,6 +72,8 @@ impl Server {
                     let game = &server.lock().unwrap().game.game_from_player_view(player.clone());
                     let bytes = to_vec(&game)?;
                     Self::write(&mut stream, bytes)?;
+                    let bytes = to_vec(&player.inventory)?;
+                    Self::write(&mut stream, bytes)?;
                 }
                 "!MOVE" => {
                     let direction = Self::read(&mut stream)?;

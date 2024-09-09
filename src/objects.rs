@@ -54,12 +54,13 @@ pub struct Player {
     pub name: String,
     pub x: usize,
     pub y: usize,
+    pub inventory: Vec<Object>,
     symbol: char,
 }
 
 impl Player {
     pub fn new(name: String, x: usize, y: usize, symbol: char) -> Self {
-        Player { name, x, y, symbol }
+        Player { name, x, y, symbol, inventory: Vec::new() }
     }
 }
 

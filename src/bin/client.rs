@@ -5,9 +5,7 @@ use std::{
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use fssota::{
-    chat::Chat,
-    game::Game,
-    utils::{clear_terminal, read_line},
+    chat::Chat, game::Game, objects::Object, utils::{clear_terminal, read_line}
 };
 use serde_json::from_slice;
 
@@ -78,9 +76,12 @@ impl Client {
                         }
                         self.write("!SCREEN")?;
                         let bytes = self.read()?;
-                        let game: Game = from_slice(&bytes)?;
+                        let game = from_slice::<Game>(&bytes)?;
+                        let bytes = self.read()?;
+                        let inventory = from_slice::<Vec<Object>>(&bytes)?;
                         clear_terminal();
-                        println!("{}", game);
+                        print!("{}", game);
+                        println!("{:?}", inventory);
                     }
                 }
             }
